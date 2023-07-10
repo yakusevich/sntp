@@ -1,7 +1,9 @@
 | Supported Targets | ESP32 |
 | ----------------- | ----- |
 
-# Example: using LwIP SNTP module and time functions
+# Пример: using LwIP SNTP module and time functions
+
+SNTP и `SSD1306` пример использования.
 
 This example demonstrates the use of LwIP SNTP module to obtain time from Internet servers. See the README.md file in the upper level 'examples' directory for more information about examples.
 
