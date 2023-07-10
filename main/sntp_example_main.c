@@ -461,12 +461,8 @@ void app_main(void)
  		lv_obj_clean(lv_scr_act()); //CLR Display
 		lv_obj_t *scr = lv_disp_get_scr_act(disp);
 		if (cnt < 10) { Screen1(scr); } else { Screen2(scr); }
-    
-		// raise the task priority of LVGL and/or reduce the handler period can improve the performance //10 ms
         vTaskDelay(pdMS_TO_TICKS(100));
-        // The task running lv_timer_handler should have lower priority than that running `lv_tick_inc`
         lv_timer_handler();
-		//ESP_LOGI(TAG, "LVGL version: %d.%d.%d", LVGL_VERSION_MAJOR, LVGL_VERSION_MINOR, LVGL_VERSION_PATCH);
  }
  
     //const int deep_sleep_sec = 10;
