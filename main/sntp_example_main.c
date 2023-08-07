@@ -27,6 +27,7 @@
 #define I2C_HOST 0
 #define EXAMPLE_FLASH_FREQ_MHZ 40
 char strftime_buf[64];
+
 LV_FONT_DECLARE(lv_new);
 
 #define EXAMPLE_LCD_PIXEL_CLOCK_HZ    (400 * 1000)
@@ -62,7 +63,7 @@ static void IRAM_ATTR gpio_isr_handler(void* arg)
     xQueueSendFromISR(gpio_evt_queue, &gpio_num, NULL);
 }
 
-static const char *TAG = "example";
+static const char *TAG = "log";
 
 
 /* Variable holding number of times ESP32 restarted since first boot.
@@ -87,11 +88,6 @@ void time_sync_notification_cb(struct timeval *tv)
 {
     ESP_LOGI(TAG, "Notification of a time synchronization event");
 }
-
-
-
-
-
 
 static void gpio_task_example(void* arg)
 {
@@ -160,6 +156,7 @@ void Screen1(lv_obj_t *scr)
     lv_obj_set_style_text_font(label, &lv_new, 0);
 	lv_obj_set_width(label, 128);
     lv_obj_align(label, LV_ALIGN_TOP_MID, 0, 0); //lv_obj_align(label, LV_ALIGN_CENTER, 10, 10);
+	lv_obj_set_pos(label, 5, cnt);
 	
 	//lv_obj_t *label2 = lv_label_create(scr);
 	//lv_obj_set_style_text_font(label2, &lvgl_font_arial, 0);
@@ -267,12 +264,6 @@ bool encoder_with_keys_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data){
       return false;
     }
 
-
-
-
-
-
-
 void app_main(void)
 {
 	
@@ -311,8 +302,6 @@ void app_main(void)
     }
 #endif
 
-    
-
     // Set timezone to Eastern Standard Time and print local time
     setenv("TZ", "EST5EDT,M3.2.0/2,M11.1.0", 1);
     tzset();
@@ -334,7 +323,6 @@ void app_main(void)
     strftime(strftime_buf, sizeof(strftime_buf), "%H:%M:%S", &timeinfo);
     ESP_LOGI(TAG, "The current date/time in Екатеринбург is: %s", strftime_buf);
 	
-
     if (sntp_get_sync_mode() == SNTP_SYNC_MODE_SMOOTH) {
         struct timeval outdelta;
         while (sntp_get_sync_status() == SNTP_SYNC_STATUS_IN_PROGRESS) {
@@ -346,10 +334,6 @@ void app_main(void)
             vTaskDelay(2000 / portTICK_PERIOD_MS);
         }
     }
-	
-	
-	
-	
 	
 	gpio_config_t io_conf = {};
 	io_conf.intr_type = GPIO_INTR_NEGEDGE; //falling edge
@@ -466,14 +450,13 @@ void app_main(void)
  }
  
     //const int deep_sleep_sec = 10;
-    //ESP_LOGI(TAG, "Entering deep sleep for %d seconds", deep_sleep_sec);
-   //esp_deep_sleep(1000000LL * deep_sleep_sec);
+    //esp_deep_sleep(1000000LL * deep_sleep_sec);
 }
 
 static void obtain_time(void)
 {
     ESP_ERROR_CHECK( nvs_flash_init() );
-    ESP_ERROR_CHECK(esp_netif_init());
+    ESP_ERROR_CHECK( esp_netif_init() );
     ESP_ERROR_CHECK( esp_event_loop_create_default() );
 
     /**
@@ -488,7 +471,7 @@ static void obtain_time(void)
      * Read "Establishing Wi-Fi or Ethernet Connection" section in
      * examples/protocols/README.md for more information about this function.
      */
-    ESP_ERROR_CHECK(example_connect());    //Коннект к WiFi
+    ESP_ERROR_CHECK(example_connect());
 
     initialize_sntp();
 
