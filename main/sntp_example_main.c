@@ -17,12 +17,15 @@
 #include "esp_sntp.h"
 #include "driver/i2c.h"
 #include "driver/gpio.h"
+#include "driver/timer.h"
 #include "lvgl.h"
 #include "../../../components/esp_lcd/include/esp_lcd_panel_io.h"
 #include "../../../components/esp_lcd/include/esp_lcd_panel_vendor.h"
 #include "../../../components/esp_lcd/include/esp_lcd_panel_ops.h"
 #include "sys/time.h"
 #include "time.h"
+
+#define TIMER_DIVIDER 16
 
 #define I2C_HOST 0
 #define EXAMPLE_FLASH_FREQ_MHZ 40
@@ -264,6 +267,11 @@ bool encoder_with_keys_read(lv_indev_drv_t * indev_drv, lv_indev_data_t * data){
       return false;
     }
 
+static bool IRAM_ATTR timer_group_isr_callback(void * args) {
+ cnt++;
+ return false;
+}
+
 void app_main(void)
 {
 	
@@ -440,13 +448,29 @@ void app_main(void)
     ESP_LOGI(TAG, "Display LVGL Scroll Text");
 	
     
+	timer_config_t config = {
+        .divider = TIMER_DIVIDER,
+        .counter_dir = TIMER_COUNT_UP,
+        .counter_en = TIMER_PAUSE,
+        .alarm_en = TIMER_ALARM_EN,
+        .auto_reload = TIMER_AUTORELOAD_EN
+    };
+	
+	timer_init(0, 0, &config);
+	timer_set_counter_value(0,0,0);
+	timer_set_alarm_value(0,0,0.05*(TIMER_BASE_CLK/TIMER_DIVIDER));
+	timer_enable_intr(0,0);
+	timer_isr_callback_add(0,0,timer_group_isr_callback,NULL,0);
+	timer_start(0,0);
+	
+	ESP_LOGI(TAG, "HW Timer 0 start");
+	
 //10 сек сна
  while (1) {
  		lv_obj_clean(lv_scr_act()); //CLR Display
 		lv_obj_t *scr = lv_disp_get_scr_act(disp);
 		Screen1(scr);
-		//if (cnt < 10) { Screen1(scr); } else { Screen2(scr); }
-		cnt++;		
+		//if (cnt < 10) { Screen1(scr); } else { Screen2(scr); }	
 		if (cnt > 60) cnt = -20;
         vTaskDelay(pdMS_TO_TICKS(100));
         lv_timer_handler();
