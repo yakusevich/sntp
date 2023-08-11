@@ -45,7 +45,7 @@ LV_FONT_DECLARE(lv_new);
 
 #define EXAMPLE_LVGL_TICK_PERIOD_MS    2
 
-int cnt = 0, cnt2 = 0;
+int cnt = -20, cnt2 = 0, timer_count = 0;
 struct tm timeinfo;
 struct timeval now;
 long int time_h=0, time_m=0, time_s=0;
@@ -444,7 +444,10 @@ void app_main(void)
  while (1) {
  		lv_obj_clean(lv_scr_act()); //CLR Display
 		lv_obj_t *scr = lv_disp_get_scr_act(disp);
-		if (cnt < 10) { Screen1(scr); } else { Screen2(scr); }
+		Screen1(scr);
+		//if (cnt < 10) { Screen1(scr); } else { Screen2(scr); }
+		cnt++;		
+		if (cnt > 60) cnt = -20;
         vTaskDelay(pdMS_TO_TICKS(100));
         lv_timer_handler();
  }
